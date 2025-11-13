@@ -1,61 +1,61 @@
 <template>
-  <div class="min-h-screen bg-[#F9FFF9] pt-28 px-6 text-gray-900">
-    <h2 class="text-4xl font-bold text-[#009879] text-center mb-10">Payment Gateway</h2>
+  <div class="min-h-screen bg-[#F9FFF9] pt-28 px-6 text-gray-900 flex flex-col items-center">
+    <h2 class="text-4xl font-bold text-[#009879] text-center mb-10">Metode Pembayaran</h2>
 
-    <div v-if="pembayaran" class="max-w-3xl mx-auto bg-white/90 p-6 rounded-3xl shadow-lg">
+    <div v-if="pembayaran" class="bg-white/90 shadow-lg rounded-3xl p-8 w-full max-w-2xl">
       <h3 class="text-2xl font-semibold mb-6">Pilih Metode Pembayaran</h3>
 
-      <div class="space-y-3 mb-6">
-        <label class="flex items-center gap-3">
-          <input type="radio" value="QRIS" v-model="metode" class="w-5 h-5 text-[#009879]" />
-          <span class="text-lg">QRIS (Scan QR untuk membayar)</span>
+      <div class="space-y-4">
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="radio" v-model="metode" value="Transfer Bank" class="text-[#009879]" />
+          <span class="text-lg">Transfer Bank (BCA, Mandiri, BRI)</span>
         </label>
-        <label class="flex items-center gap-3">
-          <input type="radio" value="Transfer Bank" v-model="metode" class="w-5 h-5 text-[#009879]" />
-          <span class="text-lg">Transfer Bank</span>
+
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="radio" v-model="metode" value="E-Wallet" class="text-[#009879]" />
+          <span class="text-lg">E-Wallet (Dana, OVO, Gopay)</span>
         </label>
-        <label class="flex items-center gap-3">
-          <input type="radio" value="Tunai (COD)" v-model="metode" class="w-5 h-5 text-[#009879]" />
-          <span class="text-lg">Tunai (Bayar di Tempat)</span>
+
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="radio" v-model="metode" value="COD" class="text-[#009879]" />
+          <span class="text-lg">Bayar di Tempat (COD)</span>
         </label>
       </div>
 
-      <div v-if="metode" class="mt-4 text-gray-700">
-        <p><strong>Metode dipilih:</strong> {{ metode }}</p>
-
-        <div v-if="metode === 'QRIS'" class="mt-3">
-          <img src="/qris.jpg" alt="QRIS" class="w-40 mx-auto rounded-lg shadow-md" />
-          <p class="text-center text-sm mt-2">Scan untuk membayar dengan QRIS</p>
-        </div>
-
-        <div v-if="metode === 'Transfer Bank'" class="mt-3 text-center">
-          <p>Silakan transfer ke:</p>
-          <p class="font-semibold">Bank BNI - 1234567890 a.n Greenomi Teahouse</p>
-        </div>
-
-        <div v-if="metode === 'Tunai (COD)'" class="mt-3 text-center">
-          <p>Pembayaran akan dilakukan langsung di lokasi pengantaran.</p>
-        </div>
-      </div>
-
-      <hr class="my-6" />
-
-      <p class="text-lg font-semibold mb-4">Total Pembayaran: Rp {{ pembayaran.total.toLocaleString('id-ID') }}</p>
-
-      <div class="text-center">
+      <div class="mt-8 text-center">
         <button
-          @click="selesaikanPembayaran"
+          @click="prosesPembayaran"
           :disabled="!metode"
-          class="bg-[#009879] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#00BFA6] transition-all disabled:opacity-50"
+          class="bg-[#009879] text-white font-semibold px-8 py-3 rounded-full hover:bg-[#00BFA6] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Selesaikan Pembayaran
+          Proses Pembayaran
         </button>
       </div>
     </div>
 
-    <div v-else class="text-center mt-20 text-gray-600">
-      <p>Data pembayaran tidak ditemukan.</p>
+    <div v-else class="text-center text-gray-600 mt-20">
+      <p>Tidak ada data pembayaran.</p>
       <NuxtLink to="/menu" class="text-[#009879] font-semibold">Kembali ke Menu</NuxtLink>
+    </div>
+
+    <!-- Modal konfirmasi -->
+    <div
+      v-if="showModal"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md text-center">
+        <h3 class="text-2xl font-bold text-[#009879] mb-4">Pembayaran Berhasil 🎉</h3>
+        <p class="text-gray-700 mb-6">
+          Terima kasih, <strong>{{ pembayaran.nama }}</strong>! <br />
+          Pesananmu akan segera diproses.
+        </p>
+        <button
+          @click="selesai"
+          class="bg-[#009879] text-white font-semibold px-6 py-2 rounded-full hover:bg-[#00BFA6] transition-all"
+        >
+          Kembali ke Beranda
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -66,6 +66,7 @@ import { useRouter } from 'vue-router'
 
 const pembayaran = ref(null)
 const metode = ref('')
+const showModal = ref(false)
 const router = useRouter()
 
 onMounted(() => {
@@ -75,10 +76,27 @@ onMounted(() => {
   }
 })
 
-function selesaikanPembayaran() {
-  alert(`Pembayaran dengan metode ${metode.value} sebesar Rp ${pembayaran.value.total.toLocaleString('id-ID')} berhasil!\nTerima kasih telah memesan di Greenomi 🍵`)
-  localStorage.removeItem('cart')
+function prosesPembayaran() {
+  if (!metode.value) return
+  pembayaran.value.metode = metode.value
+  showModal.value = true
+
+  // Simulasi update status pembayaran
+  localStorage.setItem('pembayaran', JSON.stringify({
+    ...pembayaran.value,
+    status: 'Lunas',
+    metode: metode.value
+  }))
+}
+
+function selesai() {
   localStorage.removeItem('pembayaran')
-  router.push('/menu')
+  router.push('/')
 }
 </script>
+
+<style scoped>
+input[type="radio"] {
+  accent-color: #009879;
+}
+</style>
