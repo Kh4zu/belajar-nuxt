@@ -16,21 +16,46 @@
         </div>
 
         <!-- Menu Desktop -->
-        <div class="hidden md:flex space-x-6 lg:space-x-8 text-base sm:text-lg font-medium text-gray-700">
+        <div
+          class="hidden md:flex space-x-6 lg:space-x-8 text-base sm:text-lg font-medium text-gray-700"
+        >
           <NuxtLink to="/" class="hover:text-[#009879] transition">Beranda</NuxtLink>
           <NuxtLink to="/about" class="hover:text-[#009879] transition">Tentang</NuxtLink>
           <NuxtLink to="/galeri" class="hover:text-[#009879] transition">Menu</NuxtLink>
           <NuxtLink to="/kontak" class="hover:text-[#009879] transition">Kontak</NuxtLink>
         </div>
 
-        <!-- Tombol Menu Mobile -->
+        <!-- 🌿 Tombol Menu Mobile (pakai ikon SVG) -->
         <button
-          class="md:hidden px-3 py-2 rounded-md bg-[#009879] text-white font-semibold focus:outline-none active:scale-95 transition"
+          class="md:hidden p-2 rounded-md bg-[#009879] text-white focus:outline-none active:scale-95 transition"
           @click="isMenuOpen = !isMenuOpen"
-          aria-label="Buka menu"
+          aria-label="Toggle menu"
         >
-          <span v-if="!isMenuOpen">☰</span>
-          <span v-else>✕</span>
+          <!-- Ikon Menu -->
+          <svg
+            v-if="!isMenuOpen"
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+
+          <!-- Ikon Close -->
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
       </nav>
 
@@ -76,7 +101,9 @@
     <!-- 🌿 Footer -->
     <footer class="bg-[#009879] text-white py-10 text-center mt-auto">
       <div class="max-w-6xl mx-auto px-4 sm:px-6">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 space-y-6 md:space-y-0">
+        <div
+          class="flex flex-col md:flex-row justify-between items-center mb-6 space-y-6 md:space-y-0"
+        >
           <div class="flex items-center gap-3">
             <img
               src="/logo.png"
@@ -139,4 +166,3 @@ main {
   }
 }
 </style>
-
