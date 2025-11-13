@@ -12,7 +12,7 @@
           <NuxtLink to="/">
             <div class="flex items-center gap-2">
               <img
-                src=".png"
+                src=""
                 alt="Logo Greenomi"
                 class="w-9 h-9 sm:w-10 sm:h-10 rounded-full shadow-md object-cover"
               />
