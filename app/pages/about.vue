@@ -4,7 +4,7 @@
     <header class="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-md border-b border-green-100">
       <nav class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
         <div class="flex items-center gap-3">
-          <img src="/logo.jpg" alt="Logo Greenomi" class="w-10 h-10 rounded-full shadow-md" />
+          <img src="/logoo.jpg" alt="Logo Greenomi" class="w-10 h-10 rounded-full shadow-md" />
           <h1 class="text-2xl font-bold text-[#009879] tracking-wide">Greenomi</h1>
         </div>
         <div class="hidden md:flex space-x-8 text-lg font-medium text-gray-700">
