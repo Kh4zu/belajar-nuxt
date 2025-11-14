@@ -1,6 +1,71 @@
 <template>
   <div class="text-gray-900">
-    <!-- 🍃 Hero Section -->
+
+    <!-- 🌿 NAVBAR RESPONSIF -->
+    <header class="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b shadow-sm">
+      <nav class="max-w-7xl mx-auto flex justify-between items-center px-4 sm:px-6 py-4">
+
+        <!-- LOGO -->
+        <NuxtLink to="/" class="flex items-center gap-2">
+          <img src="/logoo.jpg" alt="Logo Greenomi" class="w-10 h-10 rounded-full object-cover shadow" />
+          <span class="text-2xl font-bold text-[#009879] tracking-wide">Greenomi</span>
+        </NuxtLink>
+
+        <!-- MENU DESKTOP -->
+        <div class="hidden md:flex gap-8 text-gray-700 font-medium">
+          <NuxtLink to="/" class="hover:text-[#009879] transition">Beranda</NuxtLink>
+          <NuxtLink to="/about" class="hover:text-[#009879] transition">Tentang</NuxtLink>
+          <NuxtLink to="/galeri" class="hover:text-[#009879] transition">Menu</NuxtLink>
+          <NuxtLink to="/kontak" class="hover:text-[#009879] transition">Kontak</NuxtLink>
+        </div>
+
+        <!-- HAMBURGER -->
+        <button
+          @click="isOpen = !isOpen"
+          class="md:hidden p-2 rounded-lg bg-[#009879] text-white active:scale-95 transition"
+        >
+          <svg
+            v-if="!isOpen"
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-7 w-7"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-7 w-7"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+
+      </nav>
+
+      <!-- MENU MOBILE -->
+      <transition name="slide-fade">
+        <div
+          v-show="isOpen"
+          class="md:hidden bg-white border-t shadow-inner flex flex-col text-gray-800"
+        >
+          <NuxtLink to="/" class="px-6 py-3 hover:bg-green-50" @click="closeMenu">Beranda</NuxtLink>
+          <NuxtLink to="/about" class="px-6 py-3 hover:bg-green-50" @click="closeMenu">Tentang</NuxtLink>
+          <NuxtLink to="/galeri" class="px-6 py-3 hover:bg-green-50" @click="closeMenu">Menu</NuxtLink>
+          <NuxtLink to="/kontak" class="px-6 py-3 hover:bg-green-50" @click="closeMenu">Kontak</NuxtLink>
+        </div>
+      </transition>
+    </header>
+
+    <!-- 🍃 HERO SECTION -->
     <section
       class="pt-28 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 bg-gradient-to-b from-[#E8F5E9] via-[#C8E6C9] to-[#A5D6A7] text-center flex flex-col items-center"
     >
@@ -13,14 +78,14 @@
         <span class="text-[#009879] font-semibold">madu hutan</span>.
       </p>
       <NuxtLink
-        to="/galeri"
+        to="/about"
         class="bg-[#009879] text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-full font-semibold shadow-md hover:bg-[#00BFA6] hover:scale-105 transition-all duration-300"
       >
-        Jelajahi Produk Kami
+        Mengenali Lebih Lanjut
       </NuxtLink>
     </section>
 
-    <!-- 🍵 Tentang Bahan-Bahan -->
+    <!-- 🍵 BAHAN-BAHAN -->
     <section class="py-16 sm:py-20 px-4 sm:px-6 bg-white text-center">
       <div class="max-w-6xl mx-auto">
         <h2 class="text-3xl sm:text-4xl font-bold text-[#006B5B] mb-10">
@@ -28,58 +93,34 @@
         </h2>
 
         <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-10">
-          <!-- 🍃 Teh Hijau -->
-          <div
-            class="bg-[#F9FFF9] rounded-3xl shadow-lg p-6 md:p-8 hover:shadow-xl transition-all duration-300"
-          >
-            <img
-              src="/ijo.jpg"
-              alt="Teh Hijau"
-              class="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 rounded-full object-cover"
-            />
+          
+          <!-- 🍃 TEH HIJAU -->
+          <div class="bg-[#F9FFF9] rounded-3xl shadow-lg p-6 md:p-8 hover:shadow-xl transition-all duration-300">
+            <img src="/ijo.jpg" class="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 rounded-full object-cover" />
             <h3 class="text-xl sm:text-2xl font-semibold text-[#009879] mb-2">🍃 Teh Hijau</h3>
-            <p class="text-gray-700 text-sm sm:text-base">
-              Dipetik dari daun muda pilihan, kaya antioksidan dan menjaga vitalitas tubuh.
-            </p>
+            <p class="text-gray-700 text-sm sm:text-base">Dipetik dari daun muda pilihan, kaya antioksidan dan menjaga vitalitas tubuh.</p>
           </div>
 
-          <!-- 🌸 Bunga Melati -->
-          <div
-            class="bg-[#F9FFF9] rounded-3xl shadow-lg p-6 md:p-8 hover:shadow-xl transition-all duration-300"
-          >
-            <img
-              src="/bahan.jpg"
-              alt="Bunga Melati"
-              class="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 rounded-full object-cover"
-            />
+          <!-- 🌸 BUNGA MELATI -->
+          <div class="bg-[#F9FFF9] rounded-3xl shadow-lg p-6 md:p-8 hover:shadow-xl transition-all duration-300">
+            <img src="/bahan.jpg" class="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 rounded-full object-cover" />
             <h3 class="text-xl sm:text-2xl font-semibold text-[#009879] mb-2">🌸 Bunga Melati</h3>
-            <p class="text-gray-700 text-sm sm:text-base">
-              Memberikan aroma menenangkan yang membuat pikiran lebih rileks.
-            </p>
+            <p class="text-gray-700 text-sm sm:text-base">Memberikan aroma menenangkan yang membuat pikiran lebih rileks.</p>
           </div>
 
-          <!-- 🍯 Madu Hutan -->
-          <div
-            class="bg-[#F9FFF9] rounded-3xl shadow-lg p-6 md:p-8 hover:shadow-xl transition-all duration-300"
-          >
-            <img
-              src="/madu.jpg"
-              alt="Madu Hutan"
-              class="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 rounded-full object-cover"
-            />
+          <!-- 🍯 MADU HUTAN -->
+          <div class="bg-[#F9FFF9] rounded-3xl shadow-lg p-6 md:p-8 hover:shadow-xl transition-all duration-300">
+            <img src="/madu.jpg" class="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 rounded-full object-cover" />
             <h3 class="text-xl sm:text-2xl font-semibold text-[#009879] mb-2">🍯 Madu Hutan</h3>
-            <p class="text-gray-700 text-sm sm:text-base">
-              Memberikan sentuhan manis alami dan menambah kehangatan setiap tegukan.
-            </p>
+            <p class="text-gray-700 text-sm sm:text-base">Memberikan sentuhan manis alami dan menambah kehangatan setiap tegukan.</p>
           </div>
+
         </div>
       </div>
     </section>
 
-    <!-- 🌿 CTA / Ajakan -->
-    <section
-      class="py-16 sm:py-20 px-4 sm:px-6 bg-gradient-to-t from-[#C8E6C9] to-[#E8F5E9] text-center"
-    >
+    <!-- 🌿 CTA -->
+    <section class="py-16 sm:py-20 px-4 sm:px-6 bg-gradient-to-t from-[#C8E6C9] to-[#E8F5E9] text-center">
       <h2 class="text-3xl sm:text-4xl font-bold text-[#006B5B] mb-6">
         Siap Merasakan Kehangatan Alami?
       </h2>
@@ -94,16 +135,30 @@
         Lihat Menu Teh Kami
       </NuxtLink>
     </section>
+
   </div>
 </template>
 
 <script setup>
-// tidak perlu script tambahan, semua sudah diatur di layout default
+import { ref } from 'vue'
+
+const isOpen = ref(false)
+const closeMenu = () => (isOpen.value = false)
 </script>
 
 <style scoped>
-/* Efek halus saat hover */
-section {
-  scroll-margin-top: 100px;
+nav a.router-link-exact-active {
+  color: #009879;
+  font-weight: 600;
+}
+
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.3s ease;
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 </style>
