@@ -13,10 +13,10 @@
         <span class="text-[#009879] font-semibold">madu hutan</span>.
       </p>
       <NuxtLink
-        to="/galeri"
+        to="/about"
         class="bg-[#009879] text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-full font-semibold shadow-md hover:bg-[#00BFA6] hover:scale-105 transition-all duration-300"
       >
-        Jelajahi Produk Kami
+        Ketahui Lebih Lanjut
       </NuxtLink>
     </section>
 
