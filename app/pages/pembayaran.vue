@@ -13,7 +13,7 @@
       <h3 class="text-2xl font-semibold mb-4">Detail Pesanan</h3>
       <ul class="space-y-2">
         <li v-for="(item, index) in pembayaran.cart" :key="index" class="flex justify-between">
-          <span>{{ item.title }} ({{ item.opsi || 'Belum dipilih' }}) x {{ item.qty }}</span>
+          <span>{{ item.title }} x {{ item.qty }}</span>
           <span>Rp {{ (item.price * item.qty).toLocaleString('id-ID') }}</span>
         </li>
       </ul>
@@ -21,10 +21,7 @@
       <p class="text-xl font-bold mt-6">Total: Rp {{ pembayaran.total.toLocaleString('id-ID') }}</p>
 
       <div class="text-center mt-10">
-        <button
-          @click="keGateway"
-          class="bg-[#009879] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#00BFA6] transition-all"
-        >
+        <button @click="keGateway" class="bg-[#009879] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#00BFA6] transition-all">
           Lanjut ke Payment Gateway
         </button>
       </div>
@@ -46,12 +43,8 @@ const router = useRouter()
 
 onMounted(() => {
   const data = localStorage.getItem('pembayaran')
-  if (data) {
-    pembayaran.value = JSON.parse(data)
-  }
+  if(data) pembayaran.value = JSON.parse(data)
 })
 
-function keGateway() {
-  router.push('/payment-gateway')
-}
+function keGateway() { if(pembayaran.value) router.push('/payment-gateway') }
 </script>

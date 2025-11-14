@@ -1,103 +1,86 @@
 <template>
   <div class="min-h-screen bg-[#F9FFF9] pt-28 px-6 text-gray-900">
-    <h2 class="text-4xl font-bold text-[#009879] text-center mb-10">Keranjang Pesanan</h2>
+    <h2 class="text-4xl font-bold text-[#009879] text-center mb-10">Keranjang Belanja</h2>
 
-    <div v-if="cart.length" class="max-w-3xl mx-auto bg-white/90 p-6 rounded-3xl shadow-lg">
-      <div
-        v-for="(item, index) in cart"
-        :key="index"
-        class="border-b border-gray-200 py-4 flex justify-between items-center"
-      >
-        <div>
-          <h3 class="text-xl font-semibold text-[#009879]">{{ item.title }}</h3>
-          <p>Harga: Rp {{ item.price.toLocaleString('id-ID') }}</p>
-          <select v-model="item.opsi" class="mt-2 border rounded-lg px-2 py-1">
-            <option disabled value="">Pilih penyajian</option>
-            <option>Teh Panas</option>
-            <option>Teh Dingin</option>
-          </select>
+    <div v-if="cartStore.cart.length" class="max-w-3xl mx-auto space-y-4">
+      <div v-for="item in cartStore.cart" :key="item.id" class="flex items-center justify-between bg-white p-4 rounded-xl shadow">
+        <div class="flex items-center gap-4">
+          <img :src="item.src" class="w-20 h-20 object-cover rounded"/>
+          <div>
+            <h3 class="font-semibold text-lg">{{ item.title }}</h3>
+            <p class="text-gray-600">Rp {{ item.price.toLocaleString('id-ID') }} x 
+              <input type="number" v-model.number="item.qty" min="1" class="w-12 border rounded px-1" @change="updateQty(item.id, item.qty)">
+            </p>
+          </div>
         </div>
-
-        <div class="flex items-center gap-3">
-          <button @click="kurangi(index)" class="bg-red-500 text-white px-3 py-1 rounded-full">-</button>
-          <span>{{ item.qty }}</span>
-          <button @click="tambah(index)" class="bg-green-500 text-white px-3 py-1 rounded-full">+</button>
-        </div>
+        <button @click="removeFromCart(item.id)" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">Hapus</button>
       </div>
 
-      <div class="mt-6">
-        <h3 class="text-lg font-semibold">Total: Rp {{ total.toLocaleString('id-ID') }}</h3>
+      <div class="text-right font-bold text-xl mt-4">
+        Total: Rp {{ cartStore.totalPrice().toLocaleString('id-ID') }}
       </div>
 
-      <!-- Form Pemesanan -->
-      <div class="mt-8">
-        <h3 class="text-xl font-bold text-[#006B5B] mb-4">Data Pemesanan</h3>
-        <form @submit.prevent="lanjutPembayaran" class="space-y-4">
-          <input v-model="nama" type="text" placeholder="Nama Lengkap" class="w-full border rounded-lg px-4 py-2" required />
-          <input v-model="alamat" type="text" placeholder="Alamat Lengkap" class="w-full border rounded-lg px-4 py-2" required />
-          <input v-model="tanggal" type="date" class="w-full border rounded-lg px-4 py-2" required />
-
-          <button
-            type="submit"
-            class="bg-[#009879] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#00BFA6] transition-all"
-          >
-            Lanjut ke Pembayaran
-          </button>
-        </form>
+      <div class="text-right mt-4">
+        <button @click="showModal = true" class="bg-[#009879] text-white px-6 py-2 rounded hover:bg-[#00BFA6] transition">Checkout</button>
       </div>
     </div>
 
-    <div v-else class="text-center mt-20 text-gray-600">
-      <p>Keranjang masih kosong.</p>
-      <NuxtLink to="/menu" class="text-[#009879] font-semibold">Kembali ke Menu</NuxtLink>
+    <div v-else class="text-center text-gray-500">
+      Keranjang kosong
+      <NuxtLink to="/menu" class="text-[#009879] font-semibold ml-2">Kembali ke Menu</NuxtLink>
     </div>
+
+    <!-- Modal Input Nama & Alamat -->
+    <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-3xl p-8 w-full max-w-md relative">
+        <h3 class="text-2xl font-bold text-[#009879] mb-6 text-center">Isi Data Pemesan</h3>
+        <div class="flex flex-col gap-4">
+          <input v-model="nama" placeholder="Nama Pemesan" class="border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#009879]"/>
+          <textarea v-model="alamat" placeholder="Alamat Pemesan" class="border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#009879]" rows="3"></textarea>
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+          <button @click="showModal = false" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 transition">Batal</button>
+          <button @click="submitCheckout" class="px-4 py-2 rounded bg-[#009879] text-white hover:bg-[#00BFA6] transition">Lanjut</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref } from 'vue'
+import { useCartStore } from '../stores/cartStore'
 import { useRouter } from 'vue-router'
 
-const cart = ref([])
-const nama = ref('')
-const alamat = ref('')
-const tanggal = ref('')
+const cartStore = useCartStore()
 const router = useRouter()
 
-onMounted(() => {
-  const savedCart = localStorage.getItem('cart')
-  if (savedCart) {
-    cart.value = JSON.parse(savedCart)
+const showModal = ref(false)
+const nama = ref('')
+const alamat = ref('')
+
+function removeFromCart(id) { cartStore.removeFromCart(id) }
+function updateQty(id, qty) { cartStore.updateQty(id, qty) }
+
+function submitCheckout() {
+  if(!nama.value.trim() || !alamat.value.trim()) {
+    alert('Nama dan alamat wajib diisi!')
+    return
   }
-})
 
-function tambah(index) {
-  cart.value[index].qty++
-  localStorage.setItem('cart', JSON.stringify(cart.value))
-}
-
-function kurangi(index) {
-  if (cart.value[index].qty > 1) {
-    cart.value[index].qty--
-  } else {
-    cart.value.splice(index, 1)
-  }
-  localStorage.setItem('cart', JSON.stringify(cart.value))
-}
-
-const total = computed(() => {
-  return cart.value.reduce((acc, item) => acc + item.price * item.qty, 0)
-})
-
-function lanjutPembayaran() {
-  const dataPesanan = {
+  const dataPembayaran = {
     nama: nama.value,
     alamat: alamat.value,
-    tanggal: tanggal.value,
-    cart: cart.value,
-    total: total.value
+    tanggal: new Date().toLocaleString('id-ID'),
+    cart: cartStore.cart,
+    total: cartStore.totalPrice(),
+    status: 'Belum Lunas'
   }
-  localStorage.setItem('pembayaran', JSON.stringify(dataPesanan))
+
+  localStorage.setItem('pembayaran', JSON.stringify(dataPembayaran))
+  cartStore.clearCart()
+  showModal.value = false
   router.push('/pembayaran')
 }
 </script>
