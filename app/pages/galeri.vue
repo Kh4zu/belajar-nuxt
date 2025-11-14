@@ -6,7 +6,7 @@
       <nav class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
 
         <!-- LOGO -->
-        <NuxtLink to="/logoo.jpg" class="flex items-center gap-3">
+        <NuxtLink to="" class="flex items-center gap-3">
           <img src="/logoo.jpg" alt="Logo Greenomi" class="w-10 h-10 rounded-full shadow-md object-cover" />
           <h1 class="text-2xl font-bold text-[#009879] tracking-wide">Greenomi</h1>
         </NuxtLink>
