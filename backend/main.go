@@ -13,7 +13,6 @@ func main() {
 
 	config.ConnectDatabase()
 
-	// MIGRATE
 	config.DB.AutoMigrate(&models.User{})
 
 	routes.RegisterRoutes(r)

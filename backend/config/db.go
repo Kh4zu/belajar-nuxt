@@ -13,17 +13,13 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	_ = godotenv.Load() // tidak masalah jika .env tidak ada
+	godotenv.Load()
 
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")
 	pass := os.Getenv("DB_PASSWORD")
 	name := os.Getenv("DB_NAME")
-
-	if host == "" || port == "" || user == "" || pass == "" || name == "" {
-		log.Fatal("Database ENV variables are missing!")
-	}
 
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
@@ -32,7 +28,7 @@ func ConnectDatabase() {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Failed to connect database:", err)
+		log.Fatal("Failed to connect to database:", err)
 	}
 
 	DB = db
