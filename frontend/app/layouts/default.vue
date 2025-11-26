@@ -33,38 +33,63 @@
           <NuxtLink to="/kontak" class="hover:text-[#009879] transition">Kontak</NuxtLink>
         </div>
 
-        <!-- 🌿 Tombol Menu Mobile -->
-        <button
-          class="md:hidden p-2 rounded-md bg-[#009879] text-white focus:outline-none active:scale-95 transition"
-          @click="isMenuOpen = !isMenuOpen"
-          aria-label="Toggle menu"
-        >
-          <!-- Ikon Menu -->
-          <svg
-            v-if="!isMenuOpen"
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-6 h-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
+        <!-- Tombol Login & User Info -->
+        <div class="flex items-center gap-4">
+          <!-- Tombol Login (muncul jika belum login) -->
+          <NuxtLink 
+            v-if="!isLoggedIn"
+            to="/login" 
+            class="bg-[#009879] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#00BFA6] transition-all duration-300 shadow-md hover:shadow-lg"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+            Login
+          </NuxtLink>
 
-          <!-- Ikon Close -->
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-6 h-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
+          <!-- User Info (muncul jika sudah login) -->
+          <div v-else class="flex items-center gap-3">
+            <span class="text-sm text-gray-700 hidden sm:block">
+              Halo, {{ currentUser.Name || currentUser.Username }}
+            </span>
+            <button 
+              @click="logout"
+              class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-red-600 transition-all duration-300"
+            >
+              Logout
+            </button>
+          </div>
+
+          <!-- 🌿 Tombol Menu Mobile -->
+          <button
+            class="md:hidden p-2 rounded-md bg-[#009879] text-white focus:outline-none active:scale-95 transition"
+            @click="isMenuOpen = !isMenuOpen"
+            aria-label="Toggle menu"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+            <!-- Ikon Menu -->
+            <svg
+              v-if="!isMenuOpen"
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+
+            <!-- Ikon Close -->
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       </nav>
 
       <!-- 🌱 Menu Mobile -->
@@ -97,6 +122,25 @@
             @click="isMenuOpen = false"
             >Kontak</NuxtLink
           >
+          <!-- Tombol Login di Mobile Menu -->
+          <NuxtLink
+            v-if="!isLoggedIn"
+            to="/login"
+            class="px-6 py-3 bg-[#009879] text-white hover:bg-[#00BFA6]"
+            @click="isMenuOpen = false"
+          >
+            Login
+          </NuxtLink>
+          <!-- User Info di Mobile Menu -->
+          <div v-else class="px-6 py-3 border-t border-gray-200">
+            <p class="text-sm text-gray-600">Halo, {{ currentUser.Name || currentUser.Username }}</p>
+            <button 
+              @click="logoutMobile"
+              class="text-red-500 text-sm mt-1 hover:text-red-700"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </transition>
     </header>
@@ -139,8 +183,46 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+
 const isMenuOpen = ref(false);
+const isLoggedIn = ref(false);
+const currentUser = ref({});
+
+// Cek status login saat komponen dimuat
+onMounted(() => {
+  checkLoginStatus();
+});
+
+// Fungsi untuk cek status login
+function checkLoginStatus() {
+  if (process.client) {
+    const userData = localStorage.getItem('current_user');
+    if (userData) {
+      currentUser.value = JSON.parse(userData);
+      isLoggedIn.value = true;
+    }
+  }
+}
+
+// Fungsi logout
+function logout() {
+  if (process.client) {
+    localStorage.removeItem('current_user');
+    localStorage.removeItem('token');
+    isLoggedIn.value = false;
+    currentUser.value = {};
+    
+    // Redirect ke halaman login
+    navigateTo('/login');
+  }
+}
+
+// Fungsi logout untuk mobile
+function logoutMobile() {
+  logout();
+  isMenuOpen.value = false;
+}
 </script>
 
 <style scoped>

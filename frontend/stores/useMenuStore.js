@@ -1,26 +1,34 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
 
-export const useMenuStore = defineStore('menu', () => {
-  const menu = ref([
-    { id: 1, src: '/panas.jpg', title: 'Teh Hijau Asli', desc: 'Teh hijau murni dengan aroma alami dan rasa segar.', price: 15000 },
-    { id: 2, src: '/meelati.jpg', title: 'Teh Melati', desc: 'Kombinasi teh hijau dan bunga melati.', price: 18000 },
-    { id: 3, src: '/maduu.jpg', title: 'Teh Madu', desc: 'Teh hijau dengan madu alami.', price: 20000 }
-  ])
+export const useMenuStore = defineStore('menu', {
+  state: () => ({
+    menu: [
+      {
+        id: 1,
+        title: 'Teh Hijau',
+        desc: 'Minuman segar teh hijau',
+        price: 12000,
+        stock: 10,
+        src: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187'
+      }
+    ]
+  }),
 
-  const addItem = (item) => {
-    item.id = Date.now()
-    menu.value.push({ ...item })
+  actions: {
+    addItem(newItem) {
+      newItem.id = Date.now()
+      this.menu.push(newItem)
+    },
+
+    updateItem(id, updated) {
+      const index = this.menu.findIndex(m => m.id === id)
+      if (index !== -1) {
+        this.menu[index] = { ...this.menu[index], ...updated }
+      }
+    },
+
+    deleteItem(id) {
+      this.menu = this.menu.filter(m => m.id !== id)
+    }
   }
-
-  const updateItem = (id, updated) => {
-    const index = menu.value.findIndex(i => i.id === id)
-    if (index !== -1) menu.value[index] = { ...menu.value[index], ...updated }
-  }
-
-  const deleteItem = (id) => {
-    menu.value = menu.value.filter(i => i.id !== id)
-  }
-
-  return { menu, addItem, updateItem, deleteItem }
 })

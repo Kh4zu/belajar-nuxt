@@ -1,22 +1,28 @@
 // nuxt.config.ts
-import { defineNuxtConfig } from 'nuxt/config'
-import tsconfigPaths from 'vite-tsconfig-paths'
-
-// Konfigurasi Nuxt 3 aman tanpa assets
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
   modules: [
-    '@nuxtjs/tailwindcss', // TailwindCSS otomatis aktif
-    '@pinia/nuxt'           // Pinia store
+    '@nuxtjs/tailwindcss',
+    '@pinia/nuxt'
   ],
 
-  // Vite config supaya alias @/ bisa dipakai tanpa error
-  vite: {
-    plugins: [tsconfigPaths()]
+  imports: {
+    dirs: ['stores']
   },
 
-  // Tidak perlu menambahkan 'css' kalau tidak ada folder assets
-  // css: [],
+  runtimeConfig: {
+    // Database configuration
+    dbHost: process.env.DB_HOST || 'localhost',
+    dbPort: process.env.DB_PORT || 5432,
+    dbName: process.env.DB_NAME || 'belajar_nuxt',
+    dbUser: process.env.DB_USER || 'postgres',
+    dbPassword: process.env.DB_PASSWORD || 'password',
+    
+    // Public config
+    public: {
+      appName: 'Greenomi'
+    }
+  }
 })

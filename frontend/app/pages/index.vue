@@ -1,5 +1,23 @@
 <template>
   <div class="text-gray-900">
+    <!-- Notifikasi Welcome -->
+    <div v-if="showWelcome" class="fixed top-20 right-4 z-50 bg-blue-500 text-white px-6 py-4 rounded-lg shadow-lg max-w-sm animate-fade-in">
+      <div class="flex items-center gap-3">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div>
+          <p class="font-semibold">Selamat Datang!</p>
+          <p class="text-sm">Kamu login sebagai <strong>{{ userRole }}</strong></p>
+        </div>
+        <button @click="showWelcome = false" class="ml-auto text-white hover:text-gray-200">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <!-- 🍃 Hero Section -->
     <section
       class="pt-28 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 bg-gradient-to-b from-[#E8F5E9] via-[#C8E6C9] to-[#A5D6A7] text-center flex flex-col items-center"
@@ -98,12 +116,38 @@
 </template>
 
 <script setup>
-// tidak perlu script tambahan, semua sudah diatur di layout default
+const showWelcome = ref(false);
+const userRole = ref('');
+
+onMounted(() => {
+  // Cek apakah user baru saja login
+  const userData = localStorage.getItem('current_user');
+  if (userData) {
+    const user = JSON.parse(userData);
+    userRole.value = user.Role;
+    showWelcome.value = true;
+    
+    // Auto hide notifikasi setelah 5 detik
+    setTimeout(() => {
+      showWelcome.value = false;
+    }, 5000);
+  }
+});
 </script>
 
 <style scoped>
-/* Efek halus saat hover */
-section {
-  scroll-margin-top: 100px;
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
