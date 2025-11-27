@@ -29,22 +29,27 @@
 
     <div v-else class="text-center mt-20 text-gray-600">
       <p>Tidak ada data pembayaran.</p>
-      <NuxtLink to="/menu" class="text-[#009879] font-semibold">Kembali ke Menu</NuxtLink>
+      <NuxtLink to="/galeri" class="text-[#009879] font-semibold">Kembali ke Menu</NuxtLink>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 
 const pembayaran = ref(null)
-const router = useRouter()
+
+// Gunakan middleware auth
+definePageMeta({
+  middleware: 'auth'
+})
 
 onMounted(() => {
   const data = localStorage.getItem('pembayaran')
   if(data) pembayaran.value = JSON.parse(data)
 })
 
-function keGateway() { if(pembayaran.value) router.push('/payment-gateway') }
+function keGateway() { 
+  if(pembayaran.value) navigateTo('/payment-gateway') 
+}
 </script>

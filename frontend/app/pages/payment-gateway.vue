@@ -32,7 +32,7 @@
 
     <div v-else class="text-center text-gray-600 mt-20">
       <p>Tidak ada data pembayaran.</p>
-      <NuxtLink to="/menu" class="text-[#009879] font-semibold">Kembali ke Menu</NuxtLink>
+      <NuxtLink to="/galeri" class="text-[#009879] font-semibold">Kembali ke Menu</NuxtLink>
     </div>
 
     <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -52,12 +52,15 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 
 const pembayaran = ref(null)
 const metode = ref('')
 const showModal = ref(false)
-const router = useRouter()
+
+// Gunakan middleware auth
+definePageMeta({
+  middleware: 'auth'
+})
 
 onMounted(() => {
   const data = localStorage.getItem('pembayaran')
@@ -78,8 +81,6 @@ function prosesPembayaran() {
 
 function selesai() {
   localStorage.removeItem('pembayaran')
-  router.push('/')
+  navigateTo('/')
 }
 </script>
-
-

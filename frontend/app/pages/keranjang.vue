@@ -27,7 +27,7 @@
 
     <div v-else class="text-center text-gray-500">
       Keranjang kosong
-      <NuxtLink to="/menu" class="text-[#009879] font-semibold ml-2">Kembali ke Menu</NuxtLink>
+      <NuxtLink to="/galeri" class="text-[#009879] font-semibold ml-2">Kembali ke Menu</NuxtLink>
     </div>
 
     <!-- Modal Input Nama & Alamat -->
@@ -44,14 +44,12 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useCartStore } from '../stores/cartStore'
-import { useRouter } from 'vue-router'
 
 const cartStore = useCartStore()
 const router = useRouter()
@@ -60,8 +58,23 @@ const showModal = ref(false)
 const nama = ref('')
 const alamat = ref('')
 
-function removeFromCart(id) { cartStore.removeFromCart(id) }
-function updateQty(id, qty) { cartStore.updateQty(id, qty) }
+// Gunakan middleware auth
+definePageMeta({
+  middleware: 'auth'
+})
+
+onMounted(() => {
+  // Load cart data saat komponen dimount
+  cartStore.loadCart()
+})
+
+function removeFromCart(id) { 
+  cartStore.removeFromCart(id) 
+}
+
+function updateQty(id, qty) { 
+  cartStore.updateQty(id, qty) 
+}
 
 function submitCheckout() {
   if(!nama.value.trim() || !alamat.value.trim()) {
@@ -69,9 +82,13 @@ function submitCheckout() {
     return
   }
 
+  const user = JSON.parse(localStorage.getItem('current_user') || '{}')
+  
   const dataPembayaran = {
     nama: nama.value,
     alamat: alamat.value,
+    user_id: user.id,
+    user_name: user.name,
     tanggal: new Date().toLocaleString('id-ID'),
     cart: cartStore.cart,
     total: cartStore.totalPrice(),
@@ -81,6 +98,6 @@ function submitCheckout() {
   localStorage.setItem('pembayaran', JSON.stringify(dataPembayaran))
   cartStore.clearCart()
   showModal.value = false
-  router.push('/pembayaran')
+  navigateTo('/pembayaran')
 }
 </script>

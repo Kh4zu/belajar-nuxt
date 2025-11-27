@@ -78,13 +78,14 @@
 
         <!-- Info Login -->
         <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-          <p class="text-sm font-semibold mb-2">Informasi Login:</p>
+          <p class="text-sm font-semibold mb-2">Informasi Login Default:</p>
           <p class="text-xs text-gray-600 mb-1"><strong>Admin:</strong> admin / admin123</p>
           <p class="text-xs text-gray-600 mb-1"><strong>Manager:</strong> manager / manager123</p>
           <p class="text-xs text-gray-600 mb-1"><strong>Staff IT:</strong> staff_it / staff123</p>
-          <p class="text-xs text-gray-600 mb-1"><strong>Staff Marketing:</strong> staff_mkt / staff123</p>
-          <p class="text-xs text-gray-600 mb-1"><strong>User Premium:</strong> user_premium / user123</p>
-          <p class="text-xs text-gray-600"><strong>User Regular:</strong> user_regular / user123</p>
+          
+          <p class="text-sm font-semibold mt-3 mb-2 text-green-600">User Baru (Dari Admin):</p>
+          <p class="text-xs text-gray-600">Gunakan username & password yang dibuat admin</p>
+          <p class="text-xs text-gray-600">Role sesuai yang dipilih saat pembuatan user</p>
         </div>
       </div>
     </div>
@@ -124,12 +125,13 @@ async function loginNow() {
   }
 
   try {
-    // 1. Authenticate user
+    // 1. Authenticate user menggunakan database dari localStorage
     const userData = await authenticateUser(username.value, password.value, role.value);
     
     // 2. Simpan data user ke localStorage untuk session
     localStorage.setItem('current_user', JSON.stringify(userData));
     currentUser.value = userData;
+    isLoggedIn.value = true;
     
     // 3. Rekap SEMUA user login ke database
     await saveUserLoginToDatabase(userData);
@@ -137,9 +139,9 @@ async function loginNow() {
     // 4. Tampilkan notifikasi sukses
     showSuccessNotification(userData);
     
-    // 5. Redirect ke halaman index setelah 2 detik
+    // 5. Redirect ke halaman sesuai role setelah 2 detik
     setTimeout(() => {
-      window.location.href = "/";
+      redirectBasedOnRole(userData.Role);
     }, 2000);
     
   } catch (err) {
@@ -147,6 +149,111 @@ async function loginNow() {
   } finally {
     loading.value = false;
   }
+}
+
+// FIXED: Fungsi authentication yang menggunakan database dari localStorage
+async function authenticateUser(username, password, role) {
+  // Ambil data users dari localStorage (sama dengan yang di admin)
+  const storedUsers = localStorage.getItem('greenomi_users');
+  let usersDatabase = [];
+  
+  if (storedUsers) {
+    usersDatabase = JSON.parse(storedUsers);
+  } else {
+    // Jika tidak ada data, gunakan default users
+    usersDatabase = [
+      {
+        id: '1',
+        name: 'Administrator System',
+        username: 'admin',
+        email: 'admin@greenomi.com',
+        password: 'admin123',
+        role: 'admin',
+        department: 'IT',
+        status: 'active',
+        lastLogin: '2024-01-20T10:30:00Z',
+        createdAt: '2024-01-01T00:00:00Z'
+      },
+      {
+        id: '2',
+        name: 'Budi Santoso',
+        username: 'manager',
+        email: 'budi.manager@greenomi.com',
+        password: 'manager123',
+        role: 'manager',
+        department: 'Management',
+        status: 'active',
+        lastLogin: '2024-01-20T09:15:00Z',
+        createdAt: '2024-01-02T00:00:00Z'
+      },
+      {
+        id: '3',
+        name: 'Sari Indah',
+        username: 'staff_it',
+        email: 'sari.it@greenomi.com',
+        password: 'staff123',
+        role: 'staff',
+        department: 'IT',
+        status: 'active',
+        lastLogin: '2024-01-19T16:45:00Z',
+        createdAt: '2024-01-03T00:00:00Z'
+      }
+    ];
+    localStorage.setItem('greenomi_users', JSON.stringify(usersDatabase));
+  }
+
+  // Simulasi delay network
+  await new Promise(resolve => setTimeout(resolve, 800));
+
+  // Cari user yang sesuai
+  const user = usersDatabase.find(u => 
+    u.username === username && 
+    u.password === password && 
+    u.role === role &&
+    u.status === 'active' // Pastikan user aktif
+  );
+
+  if (!user) {
+    throw new Error("Username, password, atau role salah! Atau user tidak aktif.");
+  }
+
+  // Update last login time di database
+  const updatedUsers = usersDatabase.map(u => {
+    if (u.id === user.id) {
+      return { ...u, lastLogin: new Date().toISOString() };
+    }
+    return u;
+  });
+  localStorage.setItem('greenomi_users', JSON.stringify(updatedUsers));
+
+  return {
+    id: user.id,
+    Username: user.username,
+    Password: user.password,
+    Role: user.role,
+    Name: user.name,
+    Email: user.email,
+    Department: user.department,
+    Status: user.status,
+    LoginTime: new Date().toISOString(),
+    SessionId: generateSessionId(),
+    IPAddress: "192.168.1.100",
+    UserAgent: navigator.userAgent,
+    isLoggedIn: true
+  };
+}
+
+// Fungsi untuk redirect berdasarkan role
+function redirectBasedOnRole(role) {
+  const routes = {
+    'admin': '/admin',
+    'manager': '/manager',
+    'staff': '/staff',
+    'user': '/'
+  }
+  
+  const targetRoute = routes[role] || '/'
+  navigateTo(targetRoute);
 }
 
 // Fungsi untuk menampilkan notifikasi sukses
@@ -174,95 +281,6 @@ function showSuccessNotification(userData) {
   setTimeout(() => {
     notification.remove();
   }, 3000);
-}
-
-// Database user yang tersedia (bisa dari backend)
-async function authenticateUser(username, password, role) {
-  const usersDatabase = [
-    // Admin
-    { 
-      Username: "admin", 
-      Password: "admin123", 
-      Role: "admin", 
-      Name: "Administrator System", 
-      Email: "admin@greenomi.com",
-      Department: "IT",
-      Level: "super_admin"
-    },
-    
-    // Managers
-    { 
-      Username: "manager", 
-      Password: "manager123", 
-      Role: "manager", 
-      Name: "Budi Santoso", 
-      Email: "budi.manager@greenomi.com",
-      Department: "Management",
-      Level: "manager"
-    },
-    
-    // Staff
-    { 
-      Username: "staff_it", 
-      Password: "staff123", 
-      Role: "staff", 
-      Name: "Sari Indah", 
-      Email: "sari.it@greenomi.com",
-      Department: "IT",
-      Level: "staff"
-    },
-    { 
-      Username: "staff_mkt", 
-      Password: "staff123", 
-      Role: "staff", 
-      Name: "Rudi Hartono", 
-      Email: "rudi.marketing@greenomi.com",
-      Department: "Marketing",
-      Level: "staff"
-    },
-    
-    // Users
-    { 
-      Username: "user_premium", 
-      Password: "user123", 
-      Role: "user", 
-      Name: "Dewi Lestari", 
-      Email: "dewi.premium@gmail.com",
-      Department: "Customer",
-      Level: "premium"
-    },
-    { 
-      Username: "user_regular", 
-      Password: "user123", 
-      Role: "user", 
-      Name: "Ahmad Fauzi", 
-      Email: "ahmad.regular@gmail.com",
-      Department: "Customer",
-      Level: "regular"
-    }
-  ];
-
-  // Simulasi delay network
-  await new Promise(resolve => setTimeout(resolve, 800));
-
-  // Cari user yang sesuai
-  const user = usersDatabase.find(u => 
-    u.Username === username && 
-    u.Password === password && 
-    u.Role === role
-  );
-
-  if (!user) {
-    throw new Error("Username, password, atau role salah!");
-  }
-
-  return {
-    ...user,
-    LoginTime: new Date().toISOString(),
-    SessionId: generateSessionId(),
-    IPAddress: "192.168.1.100", // Simulasi IP
-    UserAgent: navigator.userAgent
-  };
 }
 
 // Simpan data login SEMUA user ke database

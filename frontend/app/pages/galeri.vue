@@ -1,6 +1,5 @@
 <template>
-  <div class="max-w-6xl mx-auto mt-10">
-
+  <div class="max-w-6xl mx-auto mt-10 px-4">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-3xl font-bold text-[#009879]">Menu Teh</h2>
 
@@ -33,7 +32,6 @@
         </p>
 
         <div class="flex gap-2 mt-3">
-
           <!-- Edit -->
           <button 
             v-if="canCRUD" 
@@ -63,7 +61,6 @@
           >
             {{ item.stock === 0 ? 'Stok Habis' : (isLoggedIn ? 'Beli' : 'Login untuk Beli') }}
           </button>
-
         </div>
       </div>
     </div>
@@ -107,10 +104,8 @@
             Simpan
           </button>
         </div>
-
       </div>
     </div>
-
   </div>
 </template>
 
@@ -135,6 +130,11 @@ const canCRUD = computed(() => {
   return allowedRoles.includes(userRole.value)
 })
 
+// Tentukan layout dan middleware
+definePageMeta({
+  middleware: 'auth'
+})
+
 onMounted(() => {
   checkLoginStatus()
 })
@@ -145,7 +145,7 @@ function checkLoginStatus() {
     if (userData) {
       currentUser.value = JSON.parse(userData)
       isLoggedIn.value = true
-      userRole.value = currentUser.value.Role
+      userRole.value = currentUser.value.role
     }
   }
 }
