@@ -1,6 +1,5 @@
 <template>
   <div class="p-8 bg-gray-100 min-h-screen">
-    <!-- Header -->
     <div class="mb-8">
       <h1 class="text-4xl font-bold text-[#009879] mb-2">Kelola Menu</h1>
       <p class="text-gray-600">Management menu dan harga makanan</p>
@@ -18,7 +17,7 @@
           </svg>
           Tambah Menu
         </button>
-        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
+        <button @click="exportMenu" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
           </svg>
@@ -78,7 +77,7 @@
               </span>
             </td>
             <td class="py-4 px-6 text-center">
-              <span class="font-semibold text-gray-800">Rp {{ menu.price.toLocaleString('id-ID') }}</span>
+              <span class="font-semibold text-gray-800">Rp {{ formatPrice(menu.price) }}</span>
             </td>
             <td class="py-4 px-6 text-center">
               <span class="font-semibold" :class="getStockClass(menu.stock)">
@@ -142,6 +141,65 @@
       </div>
     </div>
 
+    <!-- Statistics -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="bg-white p-6 rounded-2xl shadow">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-gray-500 text-sm">Total Menu</h3>
+            <p class="text-2xl font-bold text-gray-800">{{ menus.length }}</p>
+          </div>
+          <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-gray-500 text-sm">Menu Aktif</h3>
+            <p class="text-2xl font-bold text-green-600">{{ activeMenuCount }}</p>
+          </div>
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-gray-500 text-sm">Total Stok</h3>
+            <p class="text-2xl font-bold text-orange-600">{{ totalStock }}</p>
+          </div>
+          <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-gray-500 text-sm">Kategori</h3>
+            <p class="text-2xl font-bold text-purple-600">{{ categoriesCount }}</p>
+          </div>
+          <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Add/Edit Modal -->
     <div v-if="showAddModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -175,6 +233,20 @@
                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#009879]"
                 >
                 <p class="text-sm text-gray-500 mt-1">Masukkan URL gambar atau upload file</p>
+                <div class="mt-2 grid grid-cols-4 gap-2">
+                  <button type="button" @click="setSampleImage('https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop')" class="text-xs border rounded p-1 hover:bg-gray-50">
+                    Makanan 1
+                  </button>
+                  <button type="button" @click="setSampleImage('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w-400&h=300&fit=crop')" class="text-xs border rounded p-1 hover:bg-gray-50">
+                    Makanan 2
+                  </button>
+                  <button type="button" @click="setSampleImage('https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop')" class="text-xs border rounded p-1 hover:bg-gray-50">
+                    Minuman 1
+                  </button>
+                  <button type="button" @click="setSampleImage('https://images.unsplash.com/photo-1574484284002-952d92456975?w=400&h=300&fit=crop')" class="text-xs border rounded p-1 hover:bg-gray-50">
+                    Dessert
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -248,6 +320,45 @@
             ></textarea>
           </div>
 
+          <!-- Ingredients -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Bahan-bahan (opsional)</label>
+            <div class="flex gap-2 mb-2">
+              <input 
+                v-model="ingredientInput"
+                type="text"
+                class="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#009879]"
+                placeholder="Tambah bahan..."
+                @keyup.enter="addIngredient"
+              >
+              <button 
+                type="button"
+                @click="addIngredient"
+                class="bg-[#009879] text-white px-4 py-2 rounded-lg hover:bg-[#007a63] transition"
+              >
+                Tambah
+              </button>
+            </div>
+            <div v-if="menuForm.ingredients && menuForm.ingredients.length > 0" class="flex flex-wrap gap-2">
+              <span 
+                v-for="(ingredient, index) in menuForm.ingredients" 
+                :key="index"
+                class="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm"
+              >
+                {{ ingredient }}
+                <button 
+                  type="button"
+                  @click="removeIngredient(index)"
+                  class="text-gray-500 hover:text-red-600"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+
           <!-- Status -->
           <div>
             <label class="flex items-center">
@@ -285,17 +396,16 @@
 </template>
 
 <script setup>
-definePageMeta({
-  middleware: "admin",
-  layout: "admin"
-});
+// Import ref, computed, onMounted dari Vue
+import { ref, computed, onMounted } from 'vue'
 
-import { useMenuStore } from '~/stores/useMenuStore'
-
-const menuStore = useMenuStore()
 const searchQuery = ref('')
 const showAddModal = ref(false)
 const editingMenu = ref(null)
+const ingredientInput = ref('')
+
+// State untuk menyimpan menu
+const menus = ref([])
 
 // Form data
 const menuForm = ref({
@@ -305,22 +415,131 @@ const menuForm = ref({
   stock: 0,
   description: '',
   image: '',
+  ingredients: [],
   status: 'active'
 })
 
-// Filter menu based on search
+// Fungsi untuk show toast (ganti dengan fungsi sederhana)
+const showToast = (message, type = 'success') => {
+  if (typeof window !== 'undefined') {
+    alert(message)
+  }
+}
+
+// Gunakan client-only lifecycle
+onMounted(() => {
+  loadMenuFromDatabase()
+})
+
+// Fungsi untuk load menu dari localStorage
+const loadMenuFromDatabase = () => {
+  // Hanya jalankan di client side
+  if (typeof window !== 'undefined' && localStorage) {
+    const storedMenu = localStorage.getItem('greenomi_menu')
+    if (storedMenu) {
+      try {
+        menus.value = JSON.parse(storedMenu)
+      } catch (error) {
+        console.error('Error parsing menu data:', error)
+        // Initialize with default menu
+        initializeDefaultMenu()
+      }
+    } else {
+      initializeDefaultMenu()
+    }
+  }
+}
+
+// Initialize default menu
+const initializeDefaultMenu = () => {
+  const defaultMenu = [
+    {
+      id: '1',
+      name: 'Nasi Goreng Spesial',
+      category: 'Makanan Utama',
+      price: 35000,
+      stock: 25,
+      description: 'Nasi goreng dengan telur, ayam, dan sayuran segar',
+      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop',
+      ingredients: ['Nasi', 'Telur', 'Ayam', 'Sayuran', 'Bumbu Khas'],
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      popularity: 95
+    },
+    {
+      id: '2',
+      name: 'Es Teh Manis',
+      category: 'Minuman',
+      price: 15000,
+      stock: 50,
+      description: 'Es teh segar dengan gula pasir pilihan',
+      image: 'https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=400&h=300&fit=crop',
+      ingredients: ['Teh', 'Gula', 'Es Batu', 'Lemon'],
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      popularity: 88
+    },
+    {
+      id: '3',
+      name: 'Pisang Goreng',
+      category: 'Snack',
+      price: 20000,
+      stock: 30,
+      description: 'Pisang goreng renyah dengan taburan keju',
+      image: 'https://images.unsplash.com/photo-1574484284002-952d92456975?w=400&h=300&fit=crop',
+      ingredients: ['Pisang', 'Tepung', 'Keju', 'Minyak Goreng'],
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      popularity: 92
+    }
+  ]
+  menus.value = defaultMenu
+  saveMenuToDatabase()
+}
+
+// Fungsi untuk save menu ke localStorage
+const saveMenuToDatabase = () => {
+  if (typeof window !== 'undefined' && localStorage) {
+    localStorage.setItem('greenomi_menu', JSON.stringify(menus.value))
+  }
+}
+
+// Filter menu berdasarkan pencarian
 const filteredMenu = computed(() => {
-  if (!searchQuery.value) return menuStore.menu
+  if (!searchQuery.value) return menus.value
   
-  return menuStore.menu.filter(menu => 
-    menu.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    menu.category.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    menu.description.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
+  return menus.value.filter(menu => {
+    if (!menu) return false
+    
+    return (
+      menu.name?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      menu.category?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      menu.description?.toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+  })
+})
+
+// Statistics
+const activeMenuCount = computed(() => {
+  return menus.value.filter(menu => menu.status === 'active').length
+})
+
+const totalStock = computed(() => {
+  return menus.value.reduce((total, menu) => total + (Number(menu.stock) || 0), 0)
+})
+
+const categoriesCount = computed(() => {
+  const categories = menus.value.map(menu => menu.category).filter(Boolean)
+  return [...new Set(categories)].length
 })
 
 // Category styling
 const getCategoryClass = (category) => {
+  if (!category) return 'bg-gray-100 text-gray-800'
+  
   const classes = {
     'Makanan Utama': 'bg-blue-100 text-blue-800',
     'Appetizer': 'bg-green-100 text-green-800',
@@ -333,8 +552,9 @@ const getCategoryClass = (category) => {
 
 // Stock styling
 const getStockClass = (stock) => {
-  if (stock === 0) return 'text-red-500'
-  if (stock <= 10) return 'text-orange-500'
+  const stockNum = Number(stock) || 0
+  if (stockNum === 0) return 'text-red-500'
+  if (stockNum <= 10) return 'text-orange-500'
   return 'text-green-500'
 }
 
@@ -345,54 +565,110 @@ const getStatusClass = (status) => {
     : 'bg-red-100 text-red-800'
 }
 
+// Format price
+const formatPrice = (price) => {
+  const priceNum = Number(price) || 0
+  return new Intl.NumberFormat('id-ID').format(priceNum)
+}
+
 // Handle image error
 const handleImageError = (event) => {
   event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0zMiAyMEMzNS4zMTM3IDIwIDM4IDIyLjY4NjMgMzggMjZDMzggMjkuMzEzNyAzNS4zMTM3IDMyIDMyIDMyQzI4LjY4NjMgMzIgMjYgMjkuMzEzNyAyNiAyNkMyNiAyMi42ODYzIDI4LjY4NjMgMjAgMzIgMjBaIiBmaWxsPSIjOEU5MEEwIi8+CjxwYXRoIGQ9Ik0xNiAzOEMxNiAzNC42ODYzIDE4LjY4NjMgMzIgMjIgMzJINDJDMjkuODQ5NyAzMiAyMCA0MS44NDk3IDIwIDU0SDE2VjM4WiIgZmlsbD0iIzhFOTBBMCIvPgo8L3N2Zz4K'
 }
 
+// Set sample image
+const setSampleImage = (imageUrl) => {
+  menuForm.value.image = imageUrl
+}
+
+// Add ingredient
+const addIngredient = () => {
+  if (ingredientInput.value.trim()) {
+    if (!menuForm.value.ingredients) {
+      menuForm.value.ingredients = []
+    }
+    menuForm.value.ingredients.push(ingredientInput.value.trim())
+    ingredientInput.value = ''
+  }
+}
+
+// Remove ingredient
+const removeIngredient = (index) => {
+  if (menuForm.value.ingredients) {
+    menuForm.value.ingredients.splice(index, 1)
+  }
+}
+
 // Edit menu
 const editMenu = (menu) => {
+  if (!menu) return
+  
   editingMenu.value = menu
-  menuForm.value = { ...menu }
+  menuForm.value = { 
+    name: menu.name || '',
+    category: menu.category || '',
+    price: menu.price || 0,
+    stock: menu.stock || 0,
+    description: menu.description || '',
+    image: menu.image || '',
+    ingredients: menu.ingredients || [],
+    status: menu.status || 'active'
+  }
   showAddModal.value = true
 }
 
 // Toggle menu status
-const toggleMenuStatus = async (menu) => {
+const toggleMenuStatus = (menu) => {
+  if (!menu) return
+  
   menu.status = menu.status === 'active' ? 'inactive' : 'active'
-  // Here you would typically make an API call to update the status
-  showNotification(`Menu ${menu.name} ${menu.status === 'active' ? 'diaktifkan' : 'dinonaktifkan'}`, 'success')
+  saveMenuToDatabase()
+  showToast(`Menu ${menu.name} ${menu.status === 'active' ? 'diaktifkan' : 'dinonaktifkan'}`)
 }
 
 // Delete menu
-const deleteMenu = async (menuId) => {
-  if (confirm('Apakah Anda yakin ingin menghapus menu ini?')) {
-    const menu = menuStore.menu.find(m => m.id === menuId)
-    menuStore.menu = menuStore.menu.filter(m => m.id !== menuId)
-    showNotification(`Menu "${menu.name}" berhasil dihapus`, 'success')
+const deleteMenu = (menuId) => {
+  if (typeof window !== 'undefined' && confirm('Apakah Anda yakin ingin menghapus menu ini?')) {
+    const menu = menus.value.find(m => m.id === menuId)
+    menus.value = menus.value.filter(m => m.id !== menuId)
+    saveMenuToDatabase()
+    showToast(`Menu "${menu?.name}" berhasil dihapus`)
   }
 }
 
 // Save menu (add or update)
 const saveMenu = () => {
+  if (!menuForm.value.name || !menuForm.value.category) {
+    showToast('Nama dan kategori menu harus diisi', 'error')
+    return
+  }
+  
   if (editingMenu.value) {
     // Update existing menu
-    const index = menuStore.menu.findIndex(m => m.id === editingMenu.value.id)
+    const index = menus.value.findIndex(m => m.id === editingMenu.value.id)
     if (index !== -1) {
-      menuStore.menu[index] = { ...menuForm.value, id: editingMenu.value.id }
+      menus.value[index] = { 
+        ...editingMenu.value,
+        ...menuForm.value,
+        updatedAt: new Date().toISOString()
+      }
     }
-    showNotification(`Menu "${menuForm.value.name}" berhasil diupdate`, 'success')
+    showToast(`Menu "${menuForm.value.name}" berhasil diupdate`)
   } else {
     // Add new menu
     const newMenu = {
       ...menuForm.value,
       id: Date.now().toString(),
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      popularity: Math.floor(Math.random() * 100)
     }
-    menuStore.menu.unshift(newMenu)
-    showNotification(`Menu "${menuForm.value.name}" berhasil ditambahkan`, 'success')
+    
+    menus.value.unshift(newMenu)
+    showToast(`Menu "${menuForm.value.name}" berhasil ditambahkan`)
   }
   
+  saveMenuToDatabase()
   closeModal()
 }
 
@@ -407,15 +683,38 @@ const closeModal = () => {
     stock: 0,
     description: '',
     image: '',
+    ingredients: [],
     status: 'active'
+  }
+  ingredientInput.value = ''
+}
+
+// Export menu data
+const exportMenu = () => {
+  if (typeof window === 'undefined') return
+  
+  try {
+    const dataStr = JSON.stringify(menus.value, null, 2)
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr)
+    
+    const exportFileDefaultName = `greenomi_menu_${new Date().toISOString().split('T')[0]}.json`
+    
+    const linkElement = document.createElement('a')
+    linkElement.setAttribute('href', dataUri)
+    linkElement.setAttribute('download', exportFileDefaultName)
+    linkElement.click()
+    
+    showToast('Data menu berhasil diexport!')
+  } catch (error) {
+    console.error('Error exporting menu:', error)
+    showToast('Gagal mengexport data menu', 'error')
   }
 }
 
-// Show notification
-const showNotification = (message, type = 'info') => {
-  // You can implement a proper notification system here
-  alert(message)
-}
+definePageMeta({
+  middleware: "admin",
+  layout: "admin"
+})
 </script>
 
 <style scoped>

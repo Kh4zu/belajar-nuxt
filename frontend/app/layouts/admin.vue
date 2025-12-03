@@ -55,10 +55,10 @@
       <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-green-700">
         <div class="flex items-center gap-3 mb-3">
           <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
-            <span class="font-bold">A</span>
+            <span class="font-bold">{{ user?.name?.charAt(0) || 'A' }}</span>
           </div>
           <div>
-            <p class="font-semibold">{{ user?.Name }}</p>
+            <p class="font-semibold">{{ user?.name }}</p>
             <p class="text-green-200 text-xs">Administrator</p>
           </div>
         </div>
@@ -89,10 +89,14 @@ const user = ref(null);
 
 onMounted(() => {
   const userData = JSON.parse(localStorage.getItem('current_user') || 'null');
-  if (!userData || userData.Role !== 'admin') {
+  console.log('👤 Admin Layout - User data:', userData);
+  
+  if (!userData || userData.role !== 'admin') {
+    console.log('🚫 Not admin, redirecting to unauthorized');
     navigateTo('/unauthorized');
   } else {
     user.value = userData;
+    console.log('✅ Admin access granted in layout');
   }
 });
 
@@ -101,9 +105,3 @@ const logout = () => {
   navigateTo('/');
 };
 </script>
-
-<style scoped>
-.router-link-active {
-  @apply bg-green-700 font-semibold;
-}
-</style>

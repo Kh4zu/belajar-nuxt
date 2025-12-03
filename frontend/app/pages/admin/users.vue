@@ -62,8 +62,6 @@
             <td class="py-4 px-6">
               <select v-model="user.role" @change="updateUserRole(user)" class="border rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#009879]" :class="getRoleSelectClass(user.role)">
                 <option value="user">User</option>
-                <option value="staff">Staff</option>
-                <option value="manager">Manager</option>
                 <option value="admin">Admin</option>
               </select>
             </td>
@@ -99,6 +97,11 @@
                 <button @click="showChangePassword(user)" class="text-purple-600 hover:text-purple-800 transition p-1 rounded" title="Ubah Password">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                  </svg>
+                </button>
+                <button @click="deleteUser(user)" class="text-red-600 hover:text-red-800 transition p-1 rounded" title="Hapus User">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                   </svg>
                 </button>
                 <button @click="loginAsUser(user)" class="text-green-600 hover:text-green-800 transition p-1 rounded" title="Login sebagai User">
@@ -157,12 +160,12 @@
       <div class="bg-white p-6 rounded-2xl shadow">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-gray-500 text-sm">Staff</h3>
-            <p class="text-2xl font-bold text-green-600">{{ staffCount }}</p>
+            <h3 class="text-gray-500 text-sm">User</h3>
+            <p class="text-2xl font-bold text-green-600">{{ userCount }}</p>
           </div>
           <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
             <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
           </div>
         </div>
@@ -183,11 +186,11 @@
       </div>
     </div>
 
-    <!-- Add User Modal -->
-    <div v-if="showAddUser" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <!-- Add/Edit User Modal -->
+    <div v-if="showAddUser || showEditUser" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-2xl w-full max-w-md">
         <div class="p-6 border-b">
-          <h3 class="text-xl font-bold text-gray-800">Tambah User Baru</h3>
+          <h3 class="text-xl font-bold text-gray-800">{{ isEditing ? 'Edit User' : 'Tambah User Baru' }}</h3>
         </div>
         
         <form @submit.prevent="saveUser" class="p-6 space-y-4">
@@ -198,7 +201,15 @@
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Username *</label>
-            <input v-model="userForm.username" type="text" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#009879]" placeholder="Masukkan username">
+            <input 
+              v-model="userForm.username" 
+              type="text" 
+              required 
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#009879]" 
+              placeholder="Masukkan username"
+              :readonly="isEditing"
+              :class="isEditing ? 'bg-gray-100' : ''"
+            >
           </div>
           
           <div>
@@ -206,7 +217,7 @@
             <input v-model="userForm.email" type="email" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#009879]" placeholder="email@example.com">
           </div>
 
-          <div>
+          <div v-if="!isEditing">
             <label class="block text-sm font-medium text-gray-700 mb-2">Password *</label>
             <input v-model="userForm.password" type="password" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#009879]" placeholder="Masukkan password">
           </div>
@@ -216,22 +227,15 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Role *</label>
               <select v-model="userForm.role" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#009879]">
                 <option value="user">User</option>
-                <option value="staff">Staff</option>
-                <option value="manager">Manager</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Department *</label>
               <select v-model="userForm.department" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#009879]">
-                <option value="">Pilih Department</option>
-                <option value="IT">IT</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Finance">Finance</option>
-                <option value="Operations">Operations</option>
-                <option value="Customer Service">Customer Service</option>
-                <option value="Management">Management</option>
                 <option value="Customer">Customer</option>
+                <option value="IT">IT</option>
+                <option value="Management">Management</option>
               </select>
             </div>
           </div>
@@ -244,7 +248,7 @@
                 true-value="active"
                 false-value="inactive"
                 class="rounded border-gray-300 text-[#009879] focus:ring-[#009879]"
-                checked
+                :checked="userForm.status === 'active'"
               >
               <span class="ml-2 text-sm text-gray-700">User aktif</span>
             </label>
@@ -252,7 +256,7 @@
           
           <div class="flex gap-3 pt-4">
             <button type="submit" class="flex-1 bg-[#009879] text-white py-3 rounded-lg hover:bg-[#007a63] transition font-semibold">
-              Simpan User
+              {{ isEditing ? 'Update User' : 'Simpan User' }}
             </button>
             <button type="button" @click="closeModal" class="flex-1 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition font-semibold">
               Batal
@@ -292,6 +296,45 @@
         </form>
       </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl w-full max-w-md">
+        <div class="p-6 border-b">
+          <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus User</h3>
+        </div>
+        
+        <div class="p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center bg-red-100">
+              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="font-semibold text-gray-800">Hapus User: {{ userToDelete?.name }}</p>
+              <p class="text-sm text-gray-600">Username: {{ userToDelete?.username }}</p>
+            </div>
+          </div>
+          
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p class="text-red-700 text-sm">
+              ⚠️ Tindakan ini tidak dapat dibatalkan. Semua data user akan dihapus permanen.
+              Pastikan user ini tidak sedang login ke sistem.
+            </p>
+          </div>
+          
+          <div class="flex gap-3">
+            <button @click="confirmDelete" class="flex-1 bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition font-semibold">
+              Ya, Hapus User
+            </button>
+            <button @click="cancelDelete" class="flex-1 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition font-semibold">
+              Batal
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -303,8 +346,12 @@ definePageMeta({
 
 const searchQuery = ref('')
 const showAddUser = ref(false)
+const showEditUser = ref(false)
 const showPasswordModal = ref(false)
+const showDeleteModal = ref(false)
 const selectedUser = ref(null)
+const userToDelete = ref(null)
+const isEditing = ref(false)
 
 // Load users from database on component mount
 const users = ref([])
@@ -315,6 +362,7 @@ onMounted(() => {
 
 // Form data
 const userForm = ref({
+  id: '',
   name: '',
   username: '',
   email: '',
@@ -351,27 +399,15 @@ const loadUsersFromDatabase = () => {
       },
       {
         id: '2',
-        name: 'Budi Santoso',
-        username: 'manager',
-        email: 'budi.manager@greenomi.com',
-        password: 'manager123',
-        role: 'manager',
-        department: 'Management',
+        name: 'Customer Demo',
+        username: 'user',
+        email: 'user@greenomi.com',
+        password: 'user123',
+        role: 'user',
+        department: 'Customer',
         status: 'active',
         lastLogin: '2024-01-20T09:15:00Z',
         createdAt: '2024-01-02T00:00:00Z'
-      },
-      {
-        id: '3',
-        name: 'Sari Indah',
-        username: 'staff_it',
-        email: 'sari.it@greenomi.com',
-        password: 'staff123',
-        role: 'staff',
-        department: 'IT',
-        status: 'active',
-        lastLogin: '2024-01-19T16:45:00Z',
-        createdAt: '2024-01-03T00:00:00Z'
       }
     ]
     users.value = defaultUsers
@@ -395,16 +431,13 @@ const filteredUsers = computed(() => {
 
 // Statistics
 const adminCount = computed(() => users.value.filter(user => user.role === 'admin').length)
-const staffCount = computed(() => users.value.filter(user => user.role === 'staff').length)
+const userCount = computed(() => users.value.filter(user => user.role === 'user').length)
 const activeUsersCount = computed(() => users.value.filter(user => user.status === 'active').length)
-const customerCount = computed(() => users.value.filter(user => user.department === 'Customer').length)
 
 // Styling functions
 const getUserAvatarClass = (role) => {
   const classes = {
     'admin': 'bg-red-500',
-    'manager': 'bg-orange-500',
-    'staff': 'bg-green-500',
     'user': 'bg-blue-500'
   }
   return classes[role] || 'bg-gray-500'
@@ -413,8 +446,6 @@ const getUserAvatarClass = (role) => {
 const getRoleSelectClass = (role) => {
   const classes = {
     'admin': 'bg-red-50 border-red-200',
-    'manager': 'bg-orange-50 border-orange-200',
-    'staff': 'bg-green-50 border-green-200',
     'user': 'bg-blue-50 border-blue-200'
   }
   return classes[role] || 'bg-gray-50 border-gray-200'
@@ -423,10 +454,6 @@ const getRoleSelectClass = (role) => {
 const getDepartmentClass = (department) => {
   const classes = {
     'IT': 'bg-blue-100 text-blue-800',
-    'Marketing': 'bg-green-100 text-green-800',
-    'Finance': 'bg-purple-100 text-purple-800',
-    'Operations': 'bg-orange-100 text-orange-800',
-    'Customer Service': 'bg-pink-100 text-pink-800',
     'Management': 'bg-red-100 text-red-800',
     'Customer': 'bg-gray-100 text-gray-800'
   }
@@ -458,8 +485,57 @@ const toggleUserStatus = (user) => {
 }
 
 const editUser = (user) => {
-  // Implement edit user functionality
-  showNotification(`Edit user: ${user.name}`, 'info')
+  isEditing.value = true
+  showEditUser.value = true
+  userForm.value = {
+    id: user.id,
+    name: user.name,
+    username: user.username,
+    email: user.email,
+    password: '', // Password tidak ditampilkan saat edit
+    role: user.role,
+    department: user.department,
+    status: user.status
+  }
+}
+
+const deleteUser = (user) => {
+  // Cek jika user sedang login
+  const currentUser = JSON.parse(localStorage.getItem('current_user') || 'null')
+  if (currentUser && currentUser.id === user.id) {
+    showNotification('Tidak bisa menghapus user yang sedang login!', 'error')
+    return
+  }
+  
+  // Cek jika user adalah admin dan ini adalah satu-satunya admin
+  if (user.role === 'admin') {
+    const adminCount = users.value.filter(u => u.role === 'admin' && u.id !== user.id).length
+    if (adminCount === 0) {
+      showNotification('Tidak bisa menghapus satu-satunya admin! Tambahkan admin lain terlebih dahulu.', 'error')
+      return
+    }
+  }
+  
+  userToDelete.value = user
+  showDeleteModal.value = true
+}
+
+const confirmDelete = () => {
+  const index = users.value.findIndex(u => u.id === userToDelete.value.id)
+  if (index !== -1) {
+    users.value.splice(index, 1)
+    saveUsersToDatabase()
+    showNotification(`User ${userToDelete.value.name} berhasil dihapus`, 'success')
+  }
+  cancelDelete()
+}
+
+const cancelDelete = () => {
+  showDeleteModal.value = false
+  userToDelete.value = null
+  setTimeout(() => {
+    userToDelete.value = null
+  }, 300)
 }
 
 const showChangePassword = (user) => {
@@ -519,10 +595,6 @@ const loginAsUser = (user) => {
   setTimeout(() => {
     if (user.role === 'admin') {
       navigateTo('/admin')
-    } else if (user.role === 'manager') {
-      navigateTo('/manager')
-    } else if (user.role === 'staff') {
-      navigateTo('/staff')
     } else {
       navigateTo('/')
     }
@@ -530,29 +602,53 @@ const loginAsUser = (user) => {
 }
 
 const saveUser = () => {
-  // Check if username already exists
-  const existingUser = users.value.find(user => user.username === userForm.value.username)
-  if (existingUser) {
-    showNotification('Username sudah digunakan! Silakan gunakan username lain.', 'error')
-    return
+  // Check if username already exists (for new user only)
+  if (!isEditing.value) {
+    const existingUser = users.value.find(user => user.username === userForm.value.username)
+    if (existingUser) {
+      showNotification('Username sudah digunakan! Silakan gunakan username lain.', 'error')
+      return
+    }
   }
 
-  const newUser = {
-    ...userForm.value,
-    id: Date.now().toString(),
-    lastLogin: new Date().toISOString(),
-    createdAt: new Date().toISOString()
+  if (isEditing.value) {
+    // Update existing user
+    const index = users.value.findIndex(u => u.id === userForm.value.id)
+    if (index !== -1) {
+      users.value[index] = {
+        ...users.value[index],
+        name: userForm.value.name,
+        email: userForm.value.email,
+        role: userForm.value.role,
+        department: userForm.value.department,
+        status: userForm.value.status
+      }
+      saveUsersToDatabase()
+      showNotification(`User ${userForm.value.name} berhasil diperbarui`, 'success')
+    }
+  } else {
+    // Add new user
+    const newUser = {
+      ...userForm.value,
+      id: Date.now().toString(),
+      lastLogin: new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    }
+    
+    users.value.unshift(newUser)
+    saveUsersToDatabase()
+    showNotification(`User ${newUser.name} berhasil ditambahkan`, 'success')
   }
   
-  users.value.unshift(newUser)
-  saveUsersToDatabase()
   closeModal()
-  showNotification(`User ${newUser.name} berhasil ditambahkan`, 'success')
 }
 
 const closeModal = () => {
   showAddUser.value = false
+  showEditUser.value = false
+  isEditing.value = false
   userForm.value = {
+    id: '',
     name: '',
     username: '',
     email: '',

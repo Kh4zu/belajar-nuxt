@@ -70,11 +70,9 @@ const loadCartCount = () => {
   let cart = []
   
   if (userData.id) {
-    // Load cart spesifik user
     const userCart = localStorage.getItem(`cart_${userData.id}`)
     cart = userCart ? JSON.parse(userCart) : []
   } else {
-    // Fallback ke cart global
     const globalCart = localStorage.getItem('cart')
     cart = globalCart ? JSON.parse(globalCart) : []
   }

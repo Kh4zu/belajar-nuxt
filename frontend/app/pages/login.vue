@@ -18,90 +18,118 @@
       <!-- Tampilkan data user setelah login -->
       <div v-if="isLoggedIn" class="mt-6 p-4 bg-green-50 rounded-lg">
         <h3 class="text-lg font-semibold mb-2">Informasi User:</h3>
-        <p><strong>Nama:</strong> {{ currentUser.Name }}</p>
-        <p><strong>Username:</strong> {{ currentUser.Username }}</p>
-        <p><strong>Role:</strong> {{ currentUser.Role }}</p>
-        <p><strong>Email:</strong> {{ currentUser.Email }}</p>
+        <p><strong>Nama:</strong> {{ currentUser.name }}</p>
+        <p><strong>Username:</strong> {{ currentUser.username }}</p>
+        <p><strong>Role:</strong> {{ currentUser.role }}</p>
+        <p><strong>Email:</strong> {{ currentUser.email }}</p>
         <button @click="logout" class="mt-3 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
           Logout
         </button>
       </div>
     </div>
 
-    <!-- Overlay Login -->
-    <div v-if="!isLoggedIn" class="fixed inset-0 bg-gray-100 bg-opacity-95 flex items-center justify-center z-50">
-      <div class="bg-white shadow-lg p-6 rounded-xl w-full max-w-sm">
+    <!-- Overlay Login/Register -->
+    <div v-if="!isLoggedIn" class="fixed inset-0 bg-gray-100 bg-opacity-95 flex items-center justify-center z-50 p-4">
+      <div class="bg-white shadow-lg p-6 rounded-xl w-full max-w-md">
+        <!-- Toggle Login/Register -->
+        <div class="flex mb-6 border-b">
+          <button 
+            @click="isRegister = false"
+            class="flex-1 py-3 font-semibold transition"
+            :class="isRegister ? 'text-gray-500' : 'text-[#009879] border-b-2 border-[#009879]'"
+          >
+            Login
+          </button>
+          <button 
+            @click="isRegister = true"
+            class="flex-1 py-3 font-semibold transition"
+            :class="!isRegister ? 'text-gray-500' : 'text-[#009879] border-b-2 border-[#009879]'"
+          >
+            Register
+          </button>
+        </div>
 
         <h2 class="text-2xl font-bold mb-6 text-center text-[#009879]">
-          Login Greenomi
+          {{ isRegister ? 'Daftar Akun Baru' : 'Login Greenomi' }}
         </h2>
 
-        <input
-          v-model="username"
-          type="text"
-          placeholder="Username"
-          class="border w-full mb-3 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#009879]"
-        />
+        <!-- Form Register -->
+        <form v-if="isRegister" @submit.prevent="registerNow" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap *</label>
+            <input v-model="registerForm.name" type="text" placeholder="Masukkan nama lengkap" class="border w-full px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#009879]" required />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Username *</label>
+            <input v-model="registerForm.username" type="text" placeholder="Pilih username" class="border w-full px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#009879]" required />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+            <input v-model="registerForm.email" type="email" placeholder="email@example.com" class="border w-full px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#009879]" required />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+            <input v-model="registerForm.password" type="password" placeholder="Masukkan password" class="border w-full px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#009879]" required />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Konfirmasi Password *</label>
+            <input v-model="registerForm.confirmPassword" type="password" placeholder="Konfirmasi password" class="border w-full px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#009879]" required />
+          </div>
 
-        <input
-          v-model="password"
-          type="password"
-          placeholder="Password"
-          class="border w-full mb-3 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#009879]"
-        />
+          <button type="submit" :disabled="!isRegisterValid || loading" class="w-full py-2 rounded text-white transition flex items-center justify-center" :class="{'bg-[#009879] hover:bg-[#00BFA6]': isRegisterValid && !loading,'bg-gray-400 cursor-not-allowed': !isRegisterValid || loading}">
+            <span v-if="loading">Loading...</span>
+            <span v-else>Daftar Sekarang</span>
+          </button>
+        </form>
 
-        <select
-          v-model="role"
-          class="border w-full mb-4 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#009879]"
-        >
-          <option disabled value="">Pilih Role</option>
-          <option value="admin">Admin</option>
-          <option value="user">User</option>
-          <option value="manager">Manager</option>
-          <option value="staff">Staff</option>
-        </select>
+        <!-- Form Login -->
+        <form v-else @submit.prevent="loginNow" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Username / Email</label>
+            <input v-model="loginForm.usernameOrEmail" type="text" placeholder="Masukkan username atau email" class="border w-full px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#009879]" required />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <input v-model="loginForm.password" type="password" placeholder="Masukkan password" class="border w-full px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#009879]" required />
+          </div>
 
-        <button
-          @click="loginNow"
-          :disabled="!isFormValid || loading"
-          class="w-full py-2 rounded text-white transition flex items-center justify-center"
-          :class="{
-            'bg-[#009879] hover:bg-[#00BFA6]': isFormValid && !loading,
-            'bg-gray-400 cursor-not-allowed': !isFormValid || loading
-          }"
-        >
-          <span v-if="loading">Loading...</span>
-          <span v-else>Login</span>
-        </button>
+          <button type="submit" :disabled="!isLoginValid || loading" class="w-full py-2 rounded text-white transition flex items-center justify-center" :class="{'bg-[#009879] hover:bg-[#00BFA6]': isLoginValid && !loading,'bg-gray-400 cursor-not-allowed': !isLoginValid || loading}">
+            <span v-if="loading">Loading...</span>
+            <span v-else>Login</span>
+          </button>
+        </form>
 
         <p v-if="error" class="text-red-500 text-sm mt-3 text-center">{{ error }}</p>
-
-        <!-- Info Login -->
-        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-          <p class="text-sm font-semibold mb-2">Informasi Login Default:</p>
-          <p class="text-xs text-gray-600 mb-1"><strong>Admin:</strong> admin / admin123</p>
-          <p class="text-xs text-gray-600 mb-1"><strong>Manager:</strong> manager / manager123</p>
-          <p class="text-xs text-gray-600 mb-1"><strong>Staff IT:</strong> staff_it / staff123</p>
-          
-          <p class="text-sm font-semibold mt-3 mb-2 text-green-600">User Baru (Dari Admin):</p>
-          <p class="text-xs text-gray-600">Gunakan username & password yang dibuat admin</p>
-          <p class="text-xs text-gray-600">Role sesuai yang dipilih saat pembuatan user</p>
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-const username = ref("");
-const password = ref("");
-const role = ref("");
-const error = ref("");
+import { ref, computed, onMounted } from 'vue';
+
+const isRegister = ref(false);
 const loading = ref(false);
+const error = ref("");
 const isLoggedIn = ref(false);
 const currentUser = ref({});
 
-// Cek apakah user sudah login
+// Form data
+const loginForm = ref({ usernameOrEmail: "", password: "" });
+const registerForm = ref({ name: "", username: "", email: "", password: "", confirmPassword: "" });
+
+// Validasi
+const isLoginValid = computed(() => loginForm.value.usernameOrEmail.trim() !== "" && loginForm.value.password.trim() !== "");
+const isRegisterValid = computed(() => {
+  return registerForm.value.name.trim() !== "" &&
+         registerForm.value.username.trim() !== "" &&
+         registerForm.value.email.trim() !== "" &&
+         registerForm.value.password.trim() !== "" &&
+         registerForm.value.confirmPassword.trim() !== "" &&
+         registerForm.value.password === registerForm.value.confirmPassword;
+});
+
+// Cek session
 onMounted(() => {
   const userData = localStorage.getItem('current_user');
   if (userData) {
@@ -110,276 +138,83 @@ onMounted(() => {
   }
 });
 
-const isFormValid = computed(() => {
-  return username.value.trim() !== "" && password.value.trim() !== "" && role.value !== "";
-});
-
-async function loginNow() {
+// Register
+async function registerNow() {
   error.value = "";
   loading.value = true;
 
-  if (!isFormValid.value) {
-    error.value = "Isi semua kolom!";
-    loading.value = false;
-    return;
-  }
-
   try {
-    // 1. Authenticate user menggunakan database dari localStorage
-    const userData = await authenticateUser(username.value, password.value, role.value);
-    
-    // 2. Simpan data user ke localStorage untuk session
-    localStorage.setItem('current_user', JSON.stringify(userData));
-    currentUser.value = userData;
+    const res = await fetch("http://localhost:8080/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: registerForm.value.name,
+        username: registerForm.value.username,
+        email: registerForm.value.email,
+        password: registerForm.value.password,
+        confirmPassword: registerForm.value.confirmPassword
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Registrasi gagal");
+
+    localStorage.setItem('current_user', JSON.stringify(data.user));
+    currentUser.value = data.user;
     isLoggedIn.value = true;
-    
-    // 3. Rekap SEMUA user login ke database
-    await saveUserLoginToDatabase(userData);
-    
-    // 4. Tampilkan notifikasi sukses
-    showSuccessNotification(userData);
-    
-    // 5. Redirect ke halaman sesuai role setelah 2 detik
-    setTimeout(() => {
-      redirectBasedOnRole(userData.Role);
-    }, 2000);
-    
+
+    setTimeout(() => redirectBasedOnRole(data.user.role), 1500);
   } catch (err) {
-    error.value = err.message || "Login gagal";
+    error.value = err.message;
   } finally {
     loading.value = false;
   }
 }
 
-// FIXED: Fungsi authentication yang menggunakan database dari localStorage
-async function authenticateUser(username, password, role) {
-  // Ambil data users dari localStorage (sama dengan yang di admin)
-  const storedUsers = localStorage.getItem('greenomi_users');
-  let usersDatabase = [];
-  
-  if (storedUsers) {
-    usersDatabase = JSON.parse(storedUsers);
-  } else {
-    // Jika tidak ada data, gunakan default users
-    usersDatabase = [
-      {
-        id: '1',
-        name: 'Administrator System',
-        username: 'admin',
-        email: 'admin@greenomi.com',
-        password: 'admin123',
-        role: 'admin',
-        department: 'IT',
-        status: 'active',
-        lastLogin: '2024-01-20T10:30:00Z',
-        createdAt: '2024-01-01T00:00:00Z'
-      },
-      {
-        id: '2',
-        name: 'Budi Santoso',
-        username: 'manager',
-        email: 'budi.manager@greenomi.com',
-        password: 'manager123',
-        role: 'manager',
-        department: 'Management',
-        status: 'active',
-        lastLogin: '2024-01-20T09:15:00Z',
-        createdAt: '2024-01-02T00:00:00Z'
-      },
-      {
-        id: '3',
-        name: 'Sari Indah',
-        username: 'staff_it',
-        email: 'sari.it@greenomi.com',
-        password: 'staff123',
-        role: 'staff',
-        department: 'IT',
-        status: 'active',
-        lastLogin: '2024-01-19T16:45:00Z',
-        createdAt: '2024-01-03T00:00:00Z'
-      }
-    ];
-    localStorage.setItem('greenomi_users', JSON.stringify(usersDatabase));
+// Login
+async function loginNow() {
+  error.value = "";
+  loading.value = true;
+
+  try {
+    const res = await fetch("http://localhost:8080/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: loginForm.value.usernameOrEmail, password: loginForm.value.password })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Login gagal");
+
+    localStorage.setItem('current_user', JSON.stringify(data.user));
+    currentUser.value = data.user;
+    isLoggedIn.value = true;
+
+    setTimeout(() => redirectBasedOnRole(data.user.role), 1500);
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    loading.value = false;
   }
-
-  // Simulasi delay network
-  await new Promise(resolve => setTimeout(resolve, 800));
-
-  // Cari user yang sesuai
-  const user = usersDatabase.find(u => 
-    u.username === username && 
-    u.password === password && 
-    u.role === role &&
-    u.status === 'active' // Pastikan user aktif
-  );
-
-  if (!user) {
-    throw new Error("Username, password, atau role salah! Atau user tidak aktif.");
-  }
-
-  // Update last login time di database
-  const updatedUsers = usersDatabase.map(u => {
-    if (u.id === user.id) {
-      return { ...u, lastLogin: new Date().toISOString() };
-    }
-    return u;
-  });
-  localStorage.setItem('greenomi_users', JSON.stringify(updatedUsers));
-
-  return {
-    id: user.id,
-    Username: user.username,
-    Password: user.password,
-    Role: user.role,
-    Name: user.name,
-    Email: user.email,
-    Department: user.department,
-    Status: user.status,
-    LoginTime: new Date().toISOString(),
-    SessionId: generateSessionId(),
-    IPAddress: "192.168.1.100",
-    UserAgent: navigator.userAgent,
-    isLoggedIn: true
-  };
 }
 
-// Fungsi untuk redirect berdasarkan role
-function redirectBasedOnRole(role) {
-  const routes = {
-    'admin': '/admin',
-    'manager': '/manager',
-    'staff': '/staff',
-    'user': '/'
-  }
-  
-  const targetRoute = routes[role] || '/'
-  navigateTo(targetRoute);
-}
-
-// Fungsi untuk menampilkan notifikasi sukses
-function showSuccessNotification(userData) {
-  // Buat elemen notifikasi
-  const notification = document.createElement('div');
-  notification.className = 'fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg max-w-sm';
-  notification.innerHTML = `
-    <div class="flex items-center gap-3">
-      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-      </svg>
-      <div>
-        <p class="font-semibold">Login Berhasil!</p>
-        <p class="text-sm">Kamu masuk sebagai <strong>${userData.Role}</strong></p>
-        <p class="text-xs mt-1">Mengarahkan ke halaman utama...</p>
-      </div>
-    </div>
-  `;
-  
-  // Tambahkan ke body
-  document.body.appendChild(notification);
-  
-  // Hapus notifikasi setelah 3 detik
-  setTimeout(() => {
-    notification.remove();
-  }, 3000);
-}
-
-// Simpan data login SEMUA user ke database
-async function saveUserLoginToDatabase(userData) {
-  // Simulasi database (localStorage sebagai contoh)
-  const loginHistory = JSON.parse(localStorage.getItem('user_login_history') || '[]');
-  
-  const loginRecord = {
-    userId: userData.Username,
-    userName: userData.Name,
-    userRole: userData.Role,
-    userDepartment: userData.Department,
-    loginTime: new Date().toISOString(),
-    sessionId: userData.SessionId,
-    ipAddress: userData.IPAddress,
-    status: "success"
-  };
-  
-  // Tambahkan ke history
-  loginHistory.push(loginRecord);
-  
-  // Simpan ke "database"
-  localStorage.setItem('user_login_history', JSON.stringify(loginHistory));
-  
-  console.log('📊 Data login direkap ke database:', loginRecord);
-  
-  // Juga simpan ke statistics
-  updateLoginStatistics(userData.Role, userData.Department);
-}
-
-// Update statistics login
-function updateLoginStatistics(role, department) {
-  const stats = JSON.parse(localStorage.getItem('login_statistics') || '{}');
-  
-  // Update total login
-  stats.totalLogins = (stats.totalLogins || 0) + 1;
-  
-  // Update by role
-  if (!stats.byRole) stats.byRole = {};
-  stats.byRole[role] = (stats.byRole[role] || 0) + 1;
-  
-  // Update by department
-  if (!stats.byDepartment) stats.byDepartment = {};
-  stats.byDepartment[department] = (stats.byDepartment[department] || 0) + 1;
-  
-  // Last login time
-  stats.lastLogin = new Date().toISOString();
-  
-  localStorage.setItem('login_statistics', JSON.stringify(stats));
-}
-
-// Generate session ID
-function generateSessionId() {
-  return Math.random().toString(36).substr(2, 12) + Date.now().toString(36);
-}
-
-// Logout function
+// Logout
 function logout() {
-  // Simpan logout time ke database
-  const loginHistory = JSON.parse(localStorage.getItem('user_login_history') || '[]');
-  if (loginHistory.length > 0 && currentUser.value.SessionId) {
-    const lastLogin = loginHistory.find(login => login.sessionId === currentUser.value.SessionId);
-    if (lastLogin) {
-      lastLogin.logoutTime = new Date().toISOString();
-      lastLogin.sessionDuration = Math.floor((new Date(lastLogin.logoutTime) - new Date(lastLogin.loginTime)) / 1000);
-      localStorage.setItem('user_login_history', JSON.stringify(loginHistory));
-    }
-  }
-  
   localStorage.removeItem('current_user');
   isLoggedIn.value = false;
   currentUser.value = {};
-  username.value = "";
-  password.value = "";
-  role.value = "";
-  
+  loginForm.value = { usernameOrEmail: "", password: "" };
+  registerForm.value = { name: "", username: "", email: "", password: "", confirmPassword: "" };
   alert('Logout berhasil!');
 }
 
-// Fungsi untuk melihat rekap data (bisa dipanggil di console)
-function viewLoginHistory() {
-  const history = JSON.parse(localStorage.getItem('user_login_history') || '[]');
-  const stats = JSON.parse(localStorage.getItem('login_statistics') || '{}');
-  
-  console.log('📈 Login History:', history);
-  console.log('📊 Login Statistics:', stats);
-  
-  return { history, stats };
+// Redirect role
+function redirectBasedOnRole(role) {
+  const routes = { admin: '/admin', user: '/' };
+  window.location.href = routes[role] || '/';
 }
-
-// Expose function untuk debugging
-defineExpose({
-  viewLoginHistory
-});
 </script>
 
 <style scoped>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-}
+body { margin: 0; font-family: Arial, sans-serif; }
 </style>

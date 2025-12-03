@@ -101,6 +101,14 @@ const checkLoginStatus = () => {
   if (userData) {
     user.value = JSON.parse(userData)
     isLoggedIn.value = true
+    
+    // Redirect berdasarkan role jika di halaman yang tidak sesuai
+    const currentPath = window.location.pathname
+    if (user.value.role === 'admin' && !currentPath.startsWith('/admin')) {
+      navigateTo('/admin')
+    } else if (user.value.role === 'staff' && !currentPath.startsWith('/')) {
+      navigateTo('/')
+    }
   }
 }
 

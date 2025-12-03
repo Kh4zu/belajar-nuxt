@@ -217,10 +217,11 @@
 <script setup>
 definePageMeta({
   middleware: 'admin',
-  layout: 'admin' // TAMBAHKAN INI
+  layout: 'admin'
 });
 
-import { useMenuStore } from '~/stores/useMenuStore'
+// PERBAIKAN: Ubah nama import dari 'useMenuStore' ke 'menuStore'
+import { useMenuStore } from '~/stores/menuStore'
 
 const menuStore = useMenuStore()
 const searchQuery = ref('')
@@ -326,7 +327,6 @@ const showStockHistory = (item) => {
 }
 
 const showNotification = (message, type = 'info') => {
-  // You can implement a proper notification system here
   alert(message)
 }
 </script>
