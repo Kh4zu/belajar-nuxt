@@ -105,15 +105,12 @@
         </div>
       </div>
 
-      <!-- Additional Charts -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Stok Terkini -->
+        
         <div class="bg-white p-6 rounded-2xl shadow">
-          <h2 class="text-xl font-semibold mb-4">Status Stok</h2>
+          <h2 class="text-x1 font-semibold mb-4">Produk Terlaris</h2>
           <div class="h-80">
             <canvas ref="stockChart"></canvas>
           </div>
-        </div>
 
         <!-- Aktivitas User -->
         <div class="bg-white p-6 rounded-2xl shadow">
@@ -406,7 +403,7 @@ function initIncomeExpenseChart() {
             ticks: {
               callback: (value) => `Rp ${formatCurrency(value)}`
             }
-          }
+          } 
         }
       }
     });
